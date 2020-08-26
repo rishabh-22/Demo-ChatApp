@@ -16,12 +16,11 @@
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
 <script>
-    const socket = io.connect("http://127.0.0.1:5000");
+    const socket = io.connect("http://0.0.0.0:5000");
 
     socket.on('connect', function () {
         socket.emit('join_room', {
             username: "{{ username }}",
-            {#room: "{{ room }}"#}
         });
 
         let message_input = document.getElementById('message_input');
@@ -32,7 +31,6 @@
             if (message.length) {
                 socket.emit('send_message', {
                     username: "{{ username }}",
-                    {#room: "{{ room }}",#}
                     message: message
                 })
             }
@@ -44,7 +42,6 @@
     window.onbeforeunload = function () {
         socket.emit('leave_room', {
             username: "{{ username }}",
-            {#room: "{{ room }}"#}
         })
     };
 
