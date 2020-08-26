@@ -7,16 +7,26 @@
 <body>
 <h1>Welcome to chat room</h1>
 
-<div id="messages"></div>
+<div id="messages">
+
+</div>
 
 <form id="message_input_form">
     <input type="text" id="message_input" placeholder="Enter your message here">
     <button type="submit">Send</button>
 </form>
+
+<div id="users">
+    <h3>List of users in the room:</h3>
+    {% for user in users %}
+        <div><ul>{{ user }}</ul></div>
+    {% endfor %}
+</div>
+
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
 <script>
-    const socket = io.connect("http://0.0.0.0:5000");
+    const socket = io.connect("http://127.0.0.1:5000");
 
     socket.on('connect', function () {
         socket.emit('join_room', {
