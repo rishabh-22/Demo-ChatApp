@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, render_template, request, redirect, url_for
 from flask_socketio import SocketIO, join_room, leave_room
 from word_tags import make_tags_from_sentence
@@ -6,7 +8,7 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 
 users = []
-messages = []
+# messages = []
 
 
 @app.route('/')
@@ -19,7 +21,7 @@ def chat():
     username = request.args.get('username')
 
     if username:
-        return render_template('chat.html', username=username, users=users, messages=messages[::-1])
+        return render_template('chat.html', username=username, users=users)
     else:
         return redirect(url_for('home'))
 
@@ -29,11 +31,13 @@ def handle_send_message_event(data):
     app.logger.info(f"{data['username']} has sent message to the room: {data['message']}")
     if data['message'][0] == '|':
         msg = make_tags_from_sentence(data['message'][1:])
+        data['username'] = "System"
         data['message'] = "Here's the breakdown of your sentence" + str(msg)
+        data['created_at'] = ''
         socketio.emit('receive_message', data)
     else:
-        # tup = (data['username'], data['message'])
-        # messages.append(tup)
+        data['created_at'] = '['+datetime.now().strftime("%d %b, %H:%M")+']'
+        # messages.append(data)
         # print(messages)
         socketio.emit('receive_message', data)
 
@@ -55,4 +59,4 @@ def handle_leave_room_event(data):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
