@@ -6,7 +6,9 @@ This is a pretty basic application which offers a single room for all the partic
 
 ## To run the application locally:
 Create a virtual environment and activate it. After that install the requirements using:
+
 `pip install -r requirements.txt `
+
 `python -m nltk.downloader punkt averaged_perceptron_tagger`
 
 After successfully installing the requirements, run:
