@@ -1,25 +1,39 @@
 from datetime import datetime
-
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_socketio import SocketIO, join_room, leave_room
 from word_tags import make_tags_from_sentence
 
+
 app = Flask(__name__)
+app.secret_key = "8530297024358329"
 socketio = SocketIO(app)
 
 users = []
 # messages = []
+user_db = set()
 
 
-@app.route('/')
+@app.route('/', methods=["POST", "GET"])
 def home():
+    if 'user' in session and session['user'] in users:
+        return "Please continue your session from a single browser window.", 403
+        # return redirect(url_for('chat'))
+    if request.method == 'POST':
+        user = request.form.get('username')
+        if user in user_db:
+            message = 'Please use a different username, someone with that username already exists in the room.'
+            return render_template("index.html", message=message)
+        session['user'] = user
+        user_db.add(user)
+        return redirect(url_for('chat'))
     return render_template("index.html")
 
 
-@app.route('/chat')
+@app.route('/chat', methods=["POST", "GET"])
 def chat():
-    username = request.args.get('username')
-
+    username = ''
+    if 'user' in session and session['user'] not in users:
+        username = session['user']
     if username:
         return render_template('chat.html', username=username, users=users)
     else:
@@ -44,6 +58,8 @@ def handle_send_message_event(data):
 
 @socketio.on('join_room')
 def handle_join_room_event(data):
+    if data['username'] == session['user'] and data['username'] in users:
+        return "Please continue your session from a single browser window.", 403
     app.logger.info(f"{data['username']} has joined the room")
     users.append(data['username'])
     join_room('ocean')  # ocean is the room name
